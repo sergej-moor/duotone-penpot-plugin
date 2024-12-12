@@ -1,37 +1,17 @@
 <script lang="ts">
-  import { selection, pixelateImage, updatePreview } from '../stores/selection';
-  import { CONSTANTS } from '../constants';
+  import { onDestroy } from 'svelte';
+  import { selection, processImage, updatePreview } from '../stores/selection';
   import { tooltip } from '../actions/tooltip';
 
-  let currentValue = $selection.pixelSize;
-  let displayValue = currentValue;
+  let currentColor1 = '#FF0000'; // Default red
+  let currentColor2 = '#0000FF'; // Default blue
   let lastSelectionId = $selection.id;
   let realtimePreview = false;
   let previousRealtimeState = false;
+  let previousColor1 = currentColor1;
+  let previousColor2 = currentColor2;
 
-  // Just update the display value during dragging
-  function handleInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    displayValue = parseInt(input.value);
-  }
-
-  // Update preview when slider is released
-  function handleChange(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const pixelSize = parseInt(input.value);
-    currentValue = pixelSize;
-    displayValue = pixelSize;
-
-    // Update the preview
-    updatePreview(pixelSize);
-
-    // If realtime preview is enabled, apply the effect immediately
-    if (realtimePreview) {
-      handleApplyEffect();
-    }
-  }
-
-  // Watch for changes in realtime preview and selection fills
+  // Watch for changes in realtime preview
   $: {
     if (previousRealtimeState !== realtimePreview) {
       if (realtimePreview) {
@@ -43,12 +23,24 @@
     }
   }
 
+  // Update preview when colors change
+  $: {
+    if (
+      $selection.exportedImage &&
+      (currentColor1 !== previousColor1 || currentColor2 !== previousColor2)
+    ) {
+      updatePreview(currentColor1, currentColor2);
+      previousColor1 = currentColor1;
+      previousColor2 = currentColor2;
+    }
+  }
+
   function handleApplyEffect(): void {
-    pixelateImage(currentValue, false);
+    processImage(currentColor1, currentColor2, false);
   }
 
   function handleAddNewLayer(): void {
-    pixelateImage(currentValue, true);
+    processImage(currentColor1, currentColor2, true);
   }
 
   function handleDeleteTopLayer(): void {
@@ -60,11 +52,37 @@
     );
   }
 
-  // Only update values when selection changes (new image selected)
-  $: if ($selection.id !== lastSelectionId) {
-    currentValue = $selection.pixelSize;
-    displayValue = currentValue;
-    lastSelectionId = $selection.id;
+  function randomComplementaryPalette(): [string, string] {
+    const h = Math.floor(Math.random() * 360);
+    const s1 = Math.floor(Math.random() * 40) + 60;
+    const s2 = Math.floor(Math.random() * 40) + 60;
+    const l1 = Math.floor(Math.random() * 30) + 35;
+    const l2 = Math.floor(Math.random() * 30) + 35;
+
+    const hueOffset = Math.floor(Math.random() * 60) + 150;
+
+    return [hslToHex(h, s1, l1), hslToHex((h + hueOffset) % 360, s2, l2)];
+  }
+
+  function hslToHex(h: number, s: number, l: number): string {
+    s /= 100;
+    l /= 100;
+    const k = (n: number) => (n + h / 30) % 12;
+    const a = s * Math.min(l, 1 - l);
+    const f = (n: number) => {
+      const color = l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
+      return Math.round(255 * color)
+        .toString(16)
+        .padStart(2, '0');
+    };
+    return `#${f(0)}${f(8)}${f(4)}`;
+  }
+
+  function handleRandomColors(): void {
+    [currentColor1, currentColor2] = randomComplementaryPalette();
+    if (realtimePreview) {
+      handleApplyEffect();
+    }
   }
 
   // Check if controls should be disabled
@@ -80,12 +98,12 @@
   <div class="checkbox-container flex items-center justify-end gap-2">
     <div
       use:tooltip={{
-        text: 'Automatically apply changes while adjusting pixel size',
+        text: 'Automatically apply changes while adjusting colors',
         position: 'left',
         maxWidth: 'max-w-[200px]',
       }}
     >
-      <label for="realtimePreview" class="text-sm"> Realtime </label>
+      <label for="realtimePreview" class="text-sm">Realtime</label>
       <input
         id="realtimePreview"
         type="checkbox"
@@ -96,33 +114,35 @@
     </div>
   </div>
 
-  <label class="slider-row">
-    <span
-      class="body-s"
-      use:tooltip={{
-        text: 'Adjust the size of pixels in the effect',
-        maxWidth: 'max-w-[200px]',
-        position: 'right',
-      }}
-    >
-      Pixel Size:
-    </span>
+  <div class="color-controls flex flex-col gap-2">
     <div class="flex items-center gap-2">
-      <div class="relative flex-1">
-        <input
-          type="range"
-          min={CONSTANTS.MIN_PIXEL_SIZE}
-          max={CONSTANTS.MAX_PIXEL_SIZE}
-          value={displayValue}
-          on:input={handleInput}
-          on:change={handleChange}
-          class="w-full {isDisabled || isProcessing ? 'opacity-50' : ''}"
-          disabled={isDisabled || isProcessing}
-        />
-      </div>
-      <span class="text-sm w-8 text-right">{displayValue}</span>
+      <label for="color1" class="text-sm">Color 1:</label>
+      <input
+        id="color1"
+        type="color"
+        bind:value={currentColor1}
+        disabled={isDisabled || isProcessing}
+        class="flex-1"
+      />
     </div>
-  </label>
+    <div class="flex items-center gap-2">
+      <label for="color2" class="text-sm">Color 2:</label>
+      <input
+        id="color2"
+        type="color"
+        bind:value={currentColor2}
+        disabled={isDisabled || isProcessing}
+        class="flex-1"
+      />
+    </div>
+    <button
+      on:click={handleRandomColors}
+      disabled={isDisabled || isProcessing}
+      class="text-sm"
+    >
+      Random Colors
+    </button>
+  </div>
 
   <div class="flex flex-col gap-2">
     <button
@@ -132,7 +152,7 @@
       class:opacity-50={realtimePreview}
       class="flex-1 flex justify-center gap-2 items-center"
       use:tooltip={{
-        text: 'Apply a pixelated fill layer to the current shape',
+        text: 'Apply duotone effect to the current shape',
         position: 'top',
         maxWidth: 'max-w-[300px]',
       }}
@@ -146,7 +166,7 @@
       data-appearance="primary"
       class="flex-1 flex justify-center gap-2 items-center"
       use:tooltip={{
-        text: 'Create a new shape with the pixelation effect',
+        text: 'Create a new shape with the duotone effect',
         position: 'bottom',
         maxWidth: 'max-w-[300px]',
       }}

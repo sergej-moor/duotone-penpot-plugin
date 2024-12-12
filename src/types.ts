@@ -30,7 +30,8 @@ export interface SelectionState {
   isPixelizing: boolean;
   isUploadingFill: boolean;
   isPreviewLoading: boolean;
-  pixelSize: number;
+  color1: string;
+  color2: string;
   error?: string;
   originalImage?: {
     data: number[];

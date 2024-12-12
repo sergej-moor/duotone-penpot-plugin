@@ -1,6 +1,6 @@
 import { writable, get } from 'svelte/store';
 import type { Fill } from '@penpot/plugin-types';
-import { processImage } from '../utils/imageProcessing';
+import { processImage as processImageUtil } from '../utils/imageProcessing';
 import type { SelectionState } from '../types';
 
 const initialState: SelectionState = {
@@ -11,7 +11,8 @@ const initialState: SelectionState = {
   isPixelizing: false,
   isUploadingFill: false,
   isPreviewLoading: false,
-  pixelSize: 1,
+  color1: '#FF0000',
+  color2: '#0000FF',
   error: undefined,
 };
 
@@ -39,58 +40,58 @@ export function updateSelection(
   }));
 }
 
-export async function updatePreview(pixelSize: number): Promise<void> {
+export async function updatePreview(
+  color1: string,
+  color2: string
+): Promise<void> {
   const state = get(selection);
   if (!state.originalImage || !state.name || !state.fills || !state.id) return;
   const currentId = state.id;
 
   try {
-    // Clear any existing preview data before starting new preview
+    // Don't start a new preview if one is already in progress
+    if (state.isPreviewLoading) return;
+
     selection.update((state) => ({
       ...state,
       isPreviewLoading: true,
-      previewImage: undefined, // Clear existing preview
     }));
 
-    const processed = await processImage(
+    const processed = await processImageUtil(
       new Uint8Array(state.originalImage.data),
       state.originalImage.width,
       state.originalImage.height,
-      pixelSize
+      color1,
+      color2
     );
-
-    // Check if we still have the same selection
-    const currentState = get(selection);
-    if (
-      !currentState.name ||
-      !currentState.fills ||
-      currentState.id !== currentId
-    ) {
-      return;
-    }
 
     selection.update((state) => ({
       ...state,
-      pixelSize,
+      ...(state.id === currentId
+        ? {
+            color1,
+            color2,
+            previewImage: {
+              width: state.originalImage!.width,
+              height: state.originalImage!.height,
+              data: Array.from(processed.data),
+            },
+          }
+        : {}),
       isPreviewLoading: false,
-      previewImage: {
-        width: state.originalImage!.width,
-        height: state.originalImage!.height,
-        data: Array.from(processed.data),
-      },
     }));
   } catch (error) {
     console.error('Failed to update preview:', error);
     selection.update((state) => ({
       ...state,
       isPreviewLoading: false,
-      previewImage: undefined, // Clear preview on error
     }));
   }
 }
 
-export async function pixelateImage(
-  pixelSize: number,
+export async function processImage(
+  color1: string,
+  color2: string,
   addNewLayer: boolean
 ): Promise<void> {
   const state = get(selection);
@@ -99,11 +100,12 @@ export async function pixelateImage(
   try {
     selection.update((state) => ({ ...state, isPixelizing: true }));
 
-    const processed = await processImage(
+    const processed = await processImageUtil(
       new Uint8Array(state.originalImage.data),
       state.originalImage.width,
       state.originalImage.height,
-      pixelSize
+      color1,
+      color2
     );
 
     // Check if we still have a selection before continuing
@@ -128,7 +130,6 @@ export async function pixelateImage(
     // Update the preview with the processed image
     selection.update((state) => ({
       ...state,
-      pixelSize,
       isPixelizing: false,
       exportedImage: {
         width: state.originalImage!.width,
