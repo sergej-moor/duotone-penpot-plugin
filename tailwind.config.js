@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        GamjaFlower: ['GamjaFlower', 'sans-serif'],
+        NotoSans: ['NotoSans', 'sans-serif'],
       },
     },
   },

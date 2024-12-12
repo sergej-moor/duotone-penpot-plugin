@@ -5,8 +5,8 @@
 @tailwind utilities;
 
 @font-face {
-  font-family: 'GamjaFlower';
-  src: url('/public/GamjaFlower-Regular.ttf');
+  font-family: 'NotoSans';
+  src: url('/public/NotoSans-VariableFont.ttf');
 }
 
 :root {

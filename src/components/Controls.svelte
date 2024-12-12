@@ -3,8 +3,9 @@
   import { selection, processImage, updatePreview } from '../stores/selection';
   import { tooltip } from '../actions/tooltip';
 
-  let currentColor1 = '#FF0000'; // Default red
-  let currentColor2 = '#0000FF'; // Default blue
+  const [initialColor1, initialColor2] = randomComplementaryPalette();
+  let currentColor1 = initialColor1;
+  let currentColor2 = initialColor2;
   let lastSelectionId = $selection.id;
   let realtimePreview = false;
   let previousRealtimeState = false;
@@ -120,7 +121,7 @@
           id="color1"
           type="color"
           bind:value={currentColor1}
-          disabled={isDisabled || isProcessing}
+          disabled={isProcessing}
           class="w-full h-10 rounded cursor-pointer border-2 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
         />
       </div>
@@ -129,14 +130,19 @@
           id="color2"
           type="color"
           bind:value={currentColor2}
-          disabled={isDisabled || isProcessing}
+          disabled={isProcessing}
           class="w-full h-10 rounded cursor-pointer border-2 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
         />
       </div>
     </div>
     <button
+      use:tooltip={{
+        text: 'Swap colors',
+        position: 'top',
+        maxWidth: 'max-w-[200px]',
+      }}
       on:click={switchColors}
-      disabled={isDisabled || isProcessing}
+      disabled={isProcessing}
       type="button"
       data-appearance="secondary"
       class="h-10 w-10 p-2 flex items-center justify-center"
@@ -159,8 +165,13 @@
       >
     </button>
     <button
+      use:tooltip={{
+        text: 'Randomize colors',
+        position: 'left',
+        maxWidth: 'max-w-[200px]',
+      }}
       on:click={handleRandomColors}
-      disabled={isDisabled || isProcessing}
+      disabled={isProcessing}
       type="button"
       data-appearance="secondary"
       class="h-10 w-10 p-2 flex items-center justify-center"
@@ -186,7 +197,7 @@
     </button>
   </div>
 
-  <div class="flex flex-col gap-2">
+  <div class="flex flex-col gap-2 mt-4">
     <div class="checkbox-container flex items-center justify-end gap-2">
       <div
         use:tooltip={{
