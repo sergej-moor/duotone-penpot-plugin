@@ -1,6 +1,6 @@
 {
-  "name": "Pixelize!",
-  "description": "Pixelize your images",
+  "name": "Duotone",
+  "description": "Duotone effect for your images",
   "code": "/plugin.js",
   "icon": "/icon.png",
   "permissions": ["content:read", "content:write"]

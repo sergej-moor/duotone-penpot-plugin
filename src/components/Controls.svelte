@@ -40,6 +40,9 @@
       (currentColor1 !== previousColor1 || currentColor2 !== previousColor2)
     ) {
       updatePreview(currentColor1, currentColor2);
+      if (realtimePreview) {
+        handleApplyEffect();
+      }
       previousColor1 = currentColor1;
       previousColor2 = currentColor2;
     }
@@ -120,7 +123,10 @@
         <input
           id="color1"
           type="color"
-          bind:value={currentColor1}
+          value={currentColor1}
+          on:change={(e) => {
+            currentColor1 = e.currentTarget.value;
+          }}
           disabled={isProcessing}
           class="w-full h-10 rounded cursor-pointer border-2 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
         />
@@ -129,7 +135,10 @@
         <input
           id="color2"
           type="color"
-          bind:value={currentColor2}
+          value={currentColor2}
+          on:change={(e) => {
+            currentColor2 = e.currentTarget.value;
+          }}
           disabled={isProcessing}
           class="w-full h-10 rounded cursor-pointer border-2 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
         />
