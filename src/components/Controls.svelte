@@ -10,6 +10,7 @@
   let previousRealtimeState = false;
   let previousColor1 = currentColor1;
   let previousColor2 = currentColor2;
+  let lastProcessedId = '';
 
   // Watch for changes in realtime preview
   $: {
@@ -20,6 +21,14 @@
         handleDeleteTopLayer();
       }
       previousRealtimeState = realtimePreview;
+    }
+  }
+
+  // Apply effect when selection changes and image is loaded
+  $: {
+    if ($selection.exportedImage && $selection.id !== lastProcessedId) {
+      updatePreview(currentColor1, currentColor2);
+      lastProcessedId = $selection.id;
     }
   }
 
