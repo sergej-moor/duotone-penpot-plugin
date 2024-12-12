@@ -104,56 +104,74 @@
 </script>
 
 <div class="flex flex-col gap-4">
-  <div class="checkbox-container flex items-center justify-end gap-2">
-    <div
-      use:tooltip={{
-        text: 'Automatically apply changes while adjusting colors',
-        position: 'left',
-        maxWidth: 'max-w-[200px]',
-      }}
-    >
-      <label for="realtimePreview" class="text-sm">Realtime</label>
-      <input
-        id="realtimePreview"
-        type="checkbox"
-        bind:checked={realtimePreview}
-        disabled={isDisabled || isProcessing}
-        class="checkbox-input"
-      />
-    </div>
-  </div>
-
-  <div class="color-controls flex flex-col gap-2">
-    <div class="flex items-center gap-2">
-      <label for="color1" class="text-sm">Color 1:</label>
-      <input
-        id="color1"
-        type="color"
-        bind:value={currentColor1}
-        disabled={isDisabled || isProcessing}
-        class="flex-1"
-      />
-    </div>
-    <div class="flex items-center gap-2">
-      <label for="color2" class="text-sm">Color 2:</label>
-      <input
-        id="color2"
-        type="color"
-        bind:value={currentColor2}
-        disabled={isDisabled || isProcessing}
-        class="flex-1"
-      />
+  <div class="color-controls flex gap-2">
+    <div class="flex w-full justify-between gap-2">
+      <div class="color-picker-wrapper flex-1">
+        <input
+          id="color1"
+          type="color"
+          bind:value={currentColor1}
+          disabled={isDisabled || isProcessing}
+          class="w-full h-10 rounded cursor-pointer border-2 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+        />
+      </div>
+      <div class="color-picker-wrapper flex-1">
+        <input
+          id="color2"
+          type="color"
+          bind:value={currentColor2}
+          disabled={isDisabled || isProcessing}
+          class="w-full h-10 rounded cursor-pointer border-2 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+        />
+      </div>
     </div>
     <button
       on:click={handleRandomColors}
       disabled={isDisabled || isProcessing}
-      class="text-sm"
+      type="button"
+      data-appearance="secondary"
+      class="h-10 w-10 p-2 flex items-center justify-center"
+      aria-label="Generate random colors"
     >
-      Random Colors
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="lucide lucide-dices"
+        ><rect width="12" height="12" x="2" y="10" rx="2" ry="2" /><path
+          d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"
+        /><path d="M6 18h.01" /><path d="M10 14h.01" /><path
+          d="M15 6h.01"
+        /><path d="M18 9h.01" /></svg
+      >
     </button>
   </div>
 
   <div class="flex flex-col gap-2">
+    <div class="checkbox-container flex items-center justify-end gap-2">
+      <div
+        use:tooltip={{
+          text: 'Automatically apply changes while adjusting colors',
+          position: 'left',
+          maxWidth: 'max-w-[200px]',
+        }}
+      >
+        <label for="realtimePreview" class="text-sm">Realtime</label>
+        <input
+          id="realtimePreview"
+          type="checkbox"
+          bind:checked={realtimePreview}
+          disabled={isDisabled || isProcessing}
+          class="checkbox-input"
+        />
+      </div>
+    </div>
     <button
       on:click={handleApplyEffect}
       data-appearance="primary"
@@ -184,3 +202,28 @@
     </button>
   </div>
 </div>
+
+<style>
+  .color-picker-wrapper {
+    position: relative;
+  }
+
+  .color-picker-wrapper input[type='color'] {
+    -webkit-appearance: none;
+    padding: 0;
+  }
+
+  .color-picker-wrapper input[type='color']::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+
+  .color-picker-wrapper input[type='color']::-webkit-color-swatch {
+    border: none;
+    border-radius: 4px;
+  }
+
+  .color-picker-wrapper input[type='color']::-moz-color-swatch {
+    border: none;
+    border-radius: 4px;
+  }
+</style>
