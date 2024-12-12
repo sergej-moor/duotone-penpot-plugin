@@ -94,6 +94,15 @@
     }
   }
 
+  function switchColors(): void {
+    const temp = currentColor1;
+    currentColor1 = currentColor2;
+    currentColor2 = temp;
+    if (realtimePreview) {
+      handleApplyEffect();
+    }
+  }
+
   // Check if controls should be disabled
   $: isDisabled = !$selection.exportedImage;
   $: isProcessing =
@@ -125,6 +134,30 @@
         />
       </div>
     </div>
+    <button
+      on:click={switchColors}
+      disabled={isDisabled || isProcessing}
+      type="button"
+      data-appearance="secondary"
+      class="h-10 w-10 p-2 flex items-center justify-center"
+      aria-label="Generate random colors"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="lucide lucide-arrow-right-left"
+        ><path d="m16 3 4 4-4 4" /><path d="M20 7H4" /><path
+          d="m8 21-4-4 4-4"
+        /><path d="M4 17h16" /></svg
+      >
+    </button>
     <button
       on:click={handleRandomColors}
       disabled={isDisabled || isProcessing}
