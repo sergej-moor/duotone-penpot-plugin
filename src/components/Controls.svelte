@@ -67,10 +67,10 @@
 
   function randomComplementaryPalette(): [string, string] {
     const h = Math.floor(Math.random() * 360);
-    const s1 = Math.floor(Math.random() * 40) + 60;
+    const s1 = Math.floor(Math.random() * 20) + 10;
+    const l1 = Math.floor(Math.random() * 6) + 8;
     const s2 = Math.floor(Math.random() * 40) + 60;
-    const l1 = Math.floor(Math.random() * 30) + 35;
-    const l2 = Math.floor(Math.random() * 30) + 35;
+    const l2 = Math.floor(Math.random() * 30) + 50;
 
     const hueOffset = Math.floor(Math.random() * 60) + 150;
 
