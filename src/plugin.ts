@@ -12,7 +12,7 @@ import type {
 
 // Configuration
 const PLUGIN_CONFIG = {
-  name: 'Pixelize!',
+  name: 'Duotone',
   width: 340,
   height: 622,
 } as const;
